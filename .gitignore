@@ -14,3 +14,16 @@ wheels/
 
 # macOS system files
 .DS_Store
+
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# Streamlit cache
+.streamlit/
+
+# Logs
+*.log
+
+# Environment files
+.env
