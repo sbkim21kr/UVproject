@@ -44,15 +44,6 @@ if submit_button:
     else:
         report_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         image_data = uploaded_image.getvalue() if uploaded_image is not None else None
-
-#         It checks first:
-
-#     ✅ If uploaded_image is not None, then it safely calls .getvalue() to get the image data.
-
-#     ❌ If uploaded_image is None, it skips the method call and just sets image_data = None.
-
-# This avoids a crash and keeps your app running smoothly.
-
         new_report = {
             "time": report_time, "line": line_option, "type": issue_type,
             "details": issue_details, "image": image_data
@@ -78,25 +69,15 @@ st.sidebar.header("🔍 필터")
 # 보고서 데이터가 있을 경우에만 필터 활성화
 if st.session_state.reports:
     # 데이터프레임 변환 (필터링을 위해)
-    # Turns the list of report dictionaries into a Pandas DataFrame so you can easily filter and analyze it.
     df_reports = pd.DataFrame(st.session_state.reports)
     
     # 생산 라인 필터 (다중 선택)
     unique_lines = df_reports['line'].unique()
-    # .unique() is a method in Pandas that returns an array of distinct values from a column (or Series).
-    #  It removes duplicates and gives you a clean list of what’s actually present.
     selected_lines = st.sidebar.multiselect(
         '생산 라인',
         options=unique_lines,
         default=unique_lines
     )
-# df_reports['line'].unique() gets all unique production lines from the reports (e.g., “1번 라인”, “2번 라인”).
-
-# st.sidebar.multiselect(...) creates a multi-select dropdown in the sidebar.
-
-# default=unique_lines means all lines are selected by default.
-
-# So the user can choose which lines to include in the analysis.
 
     # 문제 유형 필터 (다중 선택)
     unique_types = df_reports['type'].unique()
@@ -120,13 +101,6 @@ if st.session_state.reports:
         df_reports['line'].isin(selected_lines) &
         df_reports['type'].isin(selected_types)
     ]
-#     This filters the DataFrame based on:
-
-#     selected_lines: the production lines the user chose in the sidebar
-
-#     selected_types: the issue types the user selected
-
-# Only rows that match both conditions are kept.
 
     if filtered_df.empty:
         st.warning("선택된 조건에 해당하는 데이터가 없습니다.")
@@ -135,8 +109,6 @@ if st.session_state.reports:
         if st.checkbox("전체 보고 데이터 보기"):
             # 이미지 열은 제외하고 표시
             st.dataframe(filtered_df.drop(columns=['image']))
-            # If the user checks the box, show the filtered data as a scrollable table — 
-            # but exclude the image column to keep it clean.
 
         st.write("---")
         st.write("#### 차트 분석")
@@ -146,35 +118,14 @@ if st.session_state.reports:
             st.write("##### 📊 문제 유형별 발생 빈도")
             issue_counts = filtered_df['type'].value_counts()
             st.bar_chart(issue_counts)
-            # Counts how many times each issue type appears
-            # Displays it as a bar chart
-
-
+            
         with viz_col2:
             st.write("##### 📈 라인별 보고 건수")
             # Plotly를 사용한 파이 차트 (Plotly 설치 필요: pip install plotly)
             # import plotly.express as px # 코드 상단에 추가
             line_counts = filtered_df['line'].value_counts()
-# filtered_df['line'] grabs the “생산 라인” column from your filtered report data.
-# .value_counts() counts how many times each line appears.
-# This is a Pandas Series:
-#     The index is the line name (e.g., '1번 라인')
-#     The value is the count (e.g., 2)
-
-
             fig = px.pie(values=line_counts.values, names=line_counts.index, title='라인별 보고 비율')
             st.plotly_chart(fig, use_container_width=True)
-# Uses Plotly Express (px) to create a pie chart.
-
-# values=line_counts.values: the number of reports per line.
-
-# names=line_counts.index: the line names (labels).
-
-# title='라인별 보고 비율': sets the chart title.
-
-# Displays the pie chart in your Streamlit app.
-
-# use_container_width=True makes it stretch to fit the column width.
 else:
     st.info("분석할 데이터가 없습니다. 먼저 보고서를 제출하십시오.")
 
